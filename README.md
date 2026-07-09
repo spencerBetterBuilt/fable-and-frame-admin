@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fable & Frame Studios — Booking & CRM Admin Tool
 
-## Getting Started
+A separate Next.js app (own deploy, own subdomain) for booking fixed-concept photo sessions (pet minis, family portraits, etc.) and tracking leads through the pipeline. See [`CLAUDE.md`](./CLAUDE.md) for the full spec and as-built implementation notes — read that first if you're picking this up cold.
 
-First, run the development server:
+## Setup
+
+```bash
+npm install
+```
+
+Copy `.env.example` to `.env` and fill in real values:
+
+- `DATABASE_URL` — a Postgres connection string (Neon or Vercel Postgres; get one from their dashboard — a free dev branch works fine locally). SQLite is no longer supported.
+- `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — **test-mode** keys (`sk_test_...` / `pk_test_...`) from the Stripe Dashboard. Do not use live keys locally.
+- `STRIPE_WEBHOOK_SECRET` — run `stripe listen --forward-to localhost:3000/api/stripe/webhook` (Stripe CLI) and paste the `whsec_...` it prints
+- `ADMIN_PASSWORD` — the shared admin login password (also doubles as the session-cookie signing secret)
+
+Once `DATABASE_URL` points at a real (even empty) Postgres database:
+
+```bash
+npx prisma migrate dev
+```
+
+## Running
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Public booking flow: [http://localhost:3000/](http://localhost:3000/)
+- Admin: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Restart the dev server after editing `.env` (env changes aren't hot-reloaded; page/action code is).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Testing a full booking
 
-## Learn More
+1. Log into `/admin`, add an open slot at `/admin/slots`.
+2. On `/`, click through the intake form for that slot.
+3. On the real Stripe Checkout page, use a test card: `4242 4242 4242 4242`, any future expiry, any CVC/ZIP.
+4. Confirm the lead shows up in `/admin` with status **Paid**.
 
-To learn more about Next.js, take a look at the following resources:
+## Build / deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+npm run start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Not yet configured for production — see the "Still needed before production" section in `CLAUDE.md`.

@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SessionType {
+  id          String   @id @default(cuid())
+  name        String // e.g. "Pet Mini Session", "Family Portrait Session"
+  depositCents Int
+  durationMin Int      @default(30) // default slot length when adding new slots of this type
+  description String?
+  isActive    Boolean  @default(true) // inactive types are hidden from the public booking page but keep historical slots/leads intact
+  createdAt   DateTime @default(now())
+  slots       Slot[]
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  notes     String? // free text: pet info, family details, or any other intake notes
+  status    String   @default("inquired") // inquired | booked | paid | contract_sent | shot | delivered
+  createdAt DateTime @default(now())
+  booking   Booking?
+}
+
+model Slot {
+  id            String      @id @default(cuid())
+  sessionTypeId String
+  sessionType   SessionType @relation(fields: [sessionTypeId], references: [id])
+  date          DateTime
+  startTime     String // e.g. "14:00"
+  durationMin   Int         @default(30)
+  isBooked      Boolean     @default(false)
+  booking       Booking?
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  leadId          String   @unique
+  lead            Lead     @relation(fields: [leadId], references: [id])
+  slotId          String   @unique
+  slot            Slot     @relation(fields: [slotId], references: [id])
+  stripeSessionId String?
+  stripePaymentId String?
+  paymentStatus   String   @default("pending") // pending | paid | failed
+  contractLink    String? // manually pasted Pixieset contract URL
+  contractStatus  String   @default("not_sent") // not_sent | sent | signed
+  createdAt       DateTime @default(now())
+}
