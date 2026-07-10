@@ -42,3 +42,7 @@ body {
   color: var(--color-ink);
   font-family: var(--font-body);
 }
+
+button:not(:disabled) {
+  cursor: pointer;
+}
