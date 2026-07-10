@@ -34,15 +34,22 @@ export default async function CheckoutPage({
     ? await prisma.lead.findUnique({ where: { id: leadId } })
     : null;
 
-  // A booking already on this slot for a *different* lead means someone
-  // else claimed it first (in the gap before either of them pays) — send
-  // this visitor back rather than crashing on the unique constraint below.
-  // If it's the same lead retrying (e.g. hit back after a cancelled
-  // checkout), fall through and reuse/refresh their existing booking.
-  const heldByOtherLead = slot?.booking && slot.booking.leadId !== lead?.id;
+  // A *paid* booking already on this slot for a different lead means
+  // someone else has genuinely claimed it — send this visitor back. If it's
+  // the same lead retrying (e.g. hit back after a cancelled checkout), fall
+  // through and reuse/refresh their existing booking.
+  const otherLeadBooking =
+    slot?.booking && slot.booking.leadId !== lead?.id ? slot.booking : null;
+  const heldByOtherPaidLead = otherLeadBooking?.paymentStatus === "paid";
 
-  if (!slot || heldByOtherLead || !lead) {
+  if (!slot || heldByOtherPaidLead || !lead) {
     redirect("/");
+  }
+
+  // A different lead started (but never paid for) checkout on this slot —
+  // their hold is stale, so release it before this lead claims the slot.
+  if (otherLeadBooking) {
+    await prisma.booking.delete({ where: { id: otherLeadBooking.id } });
   }
 
   let booking;

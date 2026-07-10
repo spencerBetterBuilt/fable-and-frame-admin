@@ -10,10 +10,10 @@ export default async function HomePage() {
     orderBy: { createdAt: "asc" },
     include: {
       slots: {
-        // Exclude slots with any booking, not just paid ones — a pending
-        // (unpaid) booking from an in-progress or abandoned checkout still
-        // holds this slot, so it shouldn't be offered to a second visitor.
-        where: { booking: null },
+        // Only a paid booking actually holds the slot — an in-progress or
+        // abandoned checkout (booking exists but unpaid) doesn't block a
+        // second visitor from picking it up.
+        where: { OR: [{ booking: null }, { booking: { paymentStatus: { not: "paid" } } }] },
         orderBy: [{ date: "asc" }, { startTime: "asc" }],
       },
     },

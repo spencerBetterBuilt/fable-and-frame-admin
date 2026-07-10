@@ -20,7 +20,7 @@ export default async function IntakePage({
     include: { booking: true, sessionType: true },
   });
 
-  if (!slot || slot.booking) {
+  if (!slot || slot.booking?.paymentStatus === "paid") {
     return (
       <main className="flex-1 mx-auto w-full max-w-2xl px-6 py-16">
         <p className="font-body text-ink/80">
