@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { stripe } from "@/lib/stripe";
 import { fulfillCheckoutSession } from "@/lib/booking";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export default async function ConfirmationPage({
 
   let paid = false;
   let notCompleted = false;
+  let isFullPayment = true;
 
   if (session_id) {
     const session = await stripe.checkout.sessions.retrieve(session_id);
@@ -25,6 +27,15 @@ export default async function ConfirmationPage({
       await fulfillCheckoutSession(session);
     } else {
       notCompleted = true;
+    }
+
+    const bookingId = session.metadata?.bookingId;
+    if (bookingId) {
+      const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: { slot: { include: { sessionType: true } } },
+      });
+      isFullPayment = booking?.slot.sessionType.isFullPayment ?? true;
     }
   }
 
@@ -50,7 +61,8 @@ export default async function ConfirmationPage({
           </h1>
           <p className="font-body text-ink/80 leading-relaxed">
             Thank you for booking a session with Fable &amp; Frame Studios.
-            Your deposit {paid ? "has been received" : "is being processed"}.
+            Your {isFullPayment ? "payment" : "deposit"}{" "}
+            {paid ? "has been received" : "is being processed"}.
             Next, we&apos;ll send over a contract to review and sign — keep
             an eye on your inbox.
           </p>

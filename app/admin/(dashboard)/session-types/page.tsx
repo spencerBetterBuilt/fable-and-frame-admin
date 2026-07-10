@@ -17,7 +17,7 @@ export default async function SessionTypesPage() {
       <h1 className="font-display text-2xl text-ink mb-2">Session Types</h1>
       <p className="font-body text-sm text-ink/60 mb-6">
         Each session type is an offering (e.g. Pet Mini Session, Family Portrait
-        Session) with its own deposit price and default duration. Slots are
+        Session) with its own price and default duration. Slots are
         created against a session type on the{" "}
         <a href="/admin/slots" className="underline">
           Slots
@@ -35,7 +35,7 @@ export default async function SessionTypesPage() {
             <input name="name" type="text" required className={inputClasses} />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs text-ink/60">Deposit ($)</span>
+            <span className="font-body text-xs text-ink/60">Price ($)</span>
             <input
               name="depositDollars"
               type="number"
@@ -44,6 +44,12 @@ export default async function SessionTypesPage() {
               required
               className={`${inputClasses} w-28`}
             />
+          </label>
+          <label className="flex items-center gap-2 pb-2.5">
+            <input name="isDeposit" type="checkbox" className="h-4 w-4" />
+            <span className="font-body text-xs text-ink/60">
+              Collect as a deposit (partial payment)
+            </span>
           </label>
           <label className="flex flex-col gap-1">
             <span className="font-body text-xs text-ink/60">Default Duration (min)</span>
@@ -64,6 +70,31 @@ export default async function SessionTypesPage() {
           <label className="flex flex-col gap-1 flex-1 min-w-[200px]">
             <span className="font-body text-xs text-ink/60">Location (optional)</span>
             <input name="location" type="text" className={inputClasses} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="font-body text-xs text-ink/60">Add-on name (optional, e.g. Pet)</span>
+            <input name="addOnUnitLabel" type="text" className={`${inputClasses} w-36`} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="font-body text-xs text-ink/60">Add-on price ($)</span>
+            <input
+              name="addOnUnitPriceDollars"
+              type="number"
+              min={0}
+              step={1}
+              className={`${inputClasses} w-28`}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="font-body text-xs text-ink/60">Units included in price</span>
+            <input
+              name="addOnIncludedUnits"
+              type="number"
+              min={1}
+              step={1}
+              defaultValue={1}
+              className={`${inputClasses} w-28`}
+            />
           </label>
           <button
             type="submit"
@@ -94,7 +125,7 @@ export default async function SessionTypesPage() {
                     />
                   </label>
                   <label className="flex flex-col gap-1">
-                    <span className="font-body text-xs text-ink/60">Deposit ($)</span>
+                    <span className="font-body text-xs text-ink/60">Price ($)</span>
                     <input
                       name="depositDollars"
                       type="number"
@@ -104,6 +135,17 @@ export default async function SessionTypesPage() {
                       required
                       className={`${inputClasses} w-28`}
                     />
+                  </label>
+                  <label className="flex items-center gap-2 pb-2.5">
+                    <input
+                      name="isDeposit"
+                      type="checkbox"
+                      defaultChecked={!sessionType.isFullPayment}
+                      className="h-4 w-4"
+                    />
+                    <span className="font-body text-xs text-ink/60">
+                      Collect as a deposit (partial payment)
+                    </span>
                   </label>
                   <label className="flex flex-col gap-1">
                     <span className="font-body text-xs text-ink/60">Default Duration (min)</span>
@@ -135,6 +177,41 @@ export default async function SessionTypesPage() {
                       className={inputClasses}
                     />
                   </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="font-body text-xs text-ink/60">Add-on name (optional, e.g. Pet)</span>
+                    <input
+                      name="addOnUnitLabel"
+                      type="text"
+                      defaultValue={sessionType.addOnUnitLabel ?? ""}
+                      className={`${inputClasses} w-36`}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="font-body text-xs text-ink/60">Add-on price ($)</span>
+                    <input
+                      name="addOnUnitPriceDollars"
+                      type="number"
+                      min={0}
+                      step={1}
+                      defaultValue={
+                        sessionType.addOnUnitPriceCents != null
+                          ? sessionType.addOnUnitPriceCents / 100
+                          : ""
+                      }
+                      className={`${inputClasses} w-28`}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="font-body text-xs text-ink/60">Units included in price</span>
+                    <input
+                      name="addOnIncludedUnits"
+                      type="number"
+                      min={1}
+                      step={1}
+                      defaultValue={sessionType.addOnIncludedUnits}
+                      className={`${inputClasses} w-28`}
+                    />
+                  </label>
                   <label className="flex items-center gap-2 pb-2.5">
                     <input
                       name="isActive"
@@ -153,7 +230,8 @@ export default async function SessionTypesPage() {
                     Save
                   </button>
                   <span className="font-body text-xs text-ink/50 self-center">
-                    Currently: {formatCents(sessionType.depositCents)} deposit
+                    Currently: {formatCents(sessionType.depositCents)}
+                    {sessionType.isFullPayment ? "" : " deposit"}
                   </span>
                 </form>
               </li>

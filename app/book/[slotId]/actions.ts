@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 export async function createLead(slotId: string, formData: FormData) {
   const slot = await prisma.slot.findUnique({
     where: { id: slotId },
-    include: { booking: true },
+    include: { booking: true, sessionType: true },
   });
   if (!slot || slot.booking) {
     redirect("/");
@@ -16,6 +16,10 @@ export async function createLead(slotId: string, formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
+  const addOnQuantityRaw = formData.get("addOnQuantity");
+  const addOnQuantity = slot.sessionType.addOnUnitLabel && addOnQuantityRaw
+    ? Number(addOnQuantityRaw)
+    : null;
 
   if (!name || !email) {
     redirect(`/book/${slotId}?error=missing-fields`);
@@ -27,6 +31,7 @@ export async function createLead(slotId: string, formData: FormData) {
       email,
       phone: phone || null,
       notes: notes || null,
+      addOnQuantity,
       status: "inquired",
     },
   });

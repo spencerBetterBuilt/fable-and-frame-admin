@@ -86,6 +86,23 @@ export default async function IntakePage({
           />
         </label>
 
+        {slot.sessionType.addOnUnitLabel && (
+          <label className="flex flex-col gap-1.5">
+            <span className="font-body text-xs uppercase tracking-[0.08em] text-sage-deep">
+              Number of {slot.sessionType.addOnUnitLabel}s
+            </span>
+            <input
+              name="addOnQuantity"
+              type="number"
+              min={slot.sessionType.addOnIncludedUnits}
+              step={1}
+              defaultValue={slot.sessionType.addOnIncludedUnits}
+              required
+              className="bg-ivory border border-sage-deep/60 rounded-sm px-4 py-3.5 font-body text-ink focus:outline-none focus:border-dusty-blue-deep w-32"
+            />
+          </label>
+        )}
+
         <label className="flex flex-col gap-1.5">
           <span className="font-body text-xs uppercase tracking-[0.08em] text-sage-deep">
             Anything else we should know? (optional)

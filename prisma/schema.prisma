@@ -10,10 +10,14 @@ datasource db {
 model SessionType {
   id          String   @id @default(cuid())
   name        String // e.g. "Pet Mini Session", "Family Portrait Session"
-  depositCents Int
+  depositCents Int // amount collected at booking — the full price when isFullPayment, otherwise a deposit
+  isFullPayment Boolean @default(true) // true: depositCents is the full session cost. false: depositCents is a partial deposit.
   durationMin Int      @default(30) // default slot length when adding new slots of this type
   description String?
   location    String? // where this session type takes place (varies per session type)
+  addOnUnitLabel      String? // e.g. "Pet" — null means this session type has no add-on
+  addOnUnitPriceCents Int? // price per unit beyond addOnIncludedUnits
+  addOnIncludedUnits  Int     @default(1) // units included in the base price
   isActive    Boolean  @default(true) // inactive types are hidden from the public booking page but keep historical slots/leads intact
   createdAt   DateTime @default(now())
   slots       Slot[]
@@ -25,6 +29,7 @@ model Lead {
   email     String
   phone     String?
   notes     String? // free text: pet info, family details, or any other intake notes
+  addOnQuantity Int? // total unit count for this booking (e.g. total pets) — null when session type has no add-on
   status    String   @default("inquired") // inquired | booked | paid | contract_sent | shot | delivered
   createdAt DateTime @default(now())
   booking   Booking?

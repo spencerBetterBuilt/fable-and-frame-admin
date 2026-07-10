@@ -54,9 +54,13 @@ export async function fulfillCheckoutSession(session: Stripe.Checkout.Session) {
       ].join("\n")
     : "We'll follow up shortly with your session details.";
 
+  const paymentLine = sessionType?.isFullPayment
+    ? "Your payment has been received."
+    : "Your deposit has been received.";
+
   await sendEmail(
     lead.email,
     "You're booked with Fable & Frame Studios!",
-    `Thanks for booking ${sessionTypeName} with Fable & Frame Studios. Your deposit has been received.\n\n${details}\n\nNext, we'll send over a contract to review and sign — keep an eye on your inbox.`
+    `Thanks for booking ${sessionTypeName} with Fable & Frame Studios. ${paymentLine}\n\n${details}\n\nNext, we'll send over a contract to review and sign — keep an eye on your inbox.`
   );
 }

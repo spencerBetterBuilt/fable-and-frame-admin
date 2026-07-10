@@ -27,7 +27,7 @@ export default async function HomePage() {
         </h1>
         <p className="font-body text-ink/80 leading-relaxed">
           Pick a session type below, choose an open time, and reserve your
-          spot with a deposit.
+          spot.
         </p>
       </header>
 
@@ -45,7 +45,15 @@ export default async function HomePage() {
               <p className="font-body text-sm text-ink/70 mb-5">
                 {sessionType.durationMin}-minute session
                 {sessionType.description ? ` · ${sessionType.description}` : ""} ·{" "}
-                {formatCents(sessionType.depositCents)} deposit
+                {formatCents(sessionType.depositCents)}
+                {sessionType.isFullPayment ? "" : " deposit"}
+                {sessionType.addOnUnitLabel && sessionType.addOnUnitPriceCents != null
+                  ? ` (includes ${sessionType.addOnIncludedUnits} ${sessionType.addOnUnitLabel}${
+                      sessionType.addOnIncludedUnits > 1 ? "s" : ""
+                    }, +${formatCents(sessionType.addOnUnitPriceCents)}/additional ${
+                      sessionType.addOnUnitLabel
+                    })`
+                  : ""}
               </p>
 
               {sessionType.slots.length === 0 ? (

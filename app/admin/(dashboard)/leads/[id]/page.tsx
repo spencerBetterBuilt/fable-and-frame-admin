@@ -59,6 +59,14 @@ export default async function LeadDetailPage({
           <dd>{lead.phone ?? "—"}</dd>
           <dt className="text-ink/60">Notes</dt>
           <dd>{lead.notes ?? "—"}</dd>
+          {lead.addOnQuantity != null && (
+            <>
+              <dt className="text-ink/60">
+                {lead.booking?.slot.sessionType.addOnUnitLabel ?? "Add-on"}s
+              </dt>
+              <dd>{lead.addOnQuantity}</dd>
+            </>
+          )}
           <dt className="text-ink/60">Inquired</dt>
           <dd>{lead.createdAt.toLocaleString()}</dd>
         </dl>

@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import type Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/app/generated/prisma/client";
 import { stripe } from "@/lib/stripe";
@@ -73,21 +74,43 @@ export default async function CheckoutPage({
 
   const origin = await getOrigin();
 
+  const { sessionType } = slot;
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    {
+      quantity: 1,
+      price_data: {
+        currency: "usd",
+        unit_amount: sessionType.depositCents,
+        product_data: {
+          name: `${sessionType.name}${sessionType.isFullPayment ? "" : " — Deposit"}`,
+        },
+      },
+    },
+  ];
+
+  if (sessionType.addOnUnitLabel && sessionType.addOnUnitPriceCents != null) {
+    const extraUnits = Math.max(
+      0,
+      (lead.addOnQuantity ?? sessionType.addOnIncludedUnits) - sessionType.addOnIncludedUnits
+    );
+    if (extraUnits > 0) {
+      lineItems.push({
+        quantity: extraUnits,
+        price_data: {
+          currency: "usd",
+          unit_amount: sessionType.addOnUnitPriceCents,
+          product_data: {
+            name: `Additional ${sessionType.addOnUnitLabel} (×${extraUnits})`,
+          },
+        },
+      });
+    }
+  }
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     customer_email: lead.email,
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: "usd",
-          unit_amount: slot.sessionType.depositCents,
-          product_data: {
-            name: `${slot.sessionType.name} — Deposit`,
-          },
-        },
-      },
-    ],
+    line_items: lineItems,
     metadata: {
       leadId: lead.id,
       slotId: slot.id,
