@@ -8,7 +8,7 @@ export async function createLead(slotId: string, formData: FormData) {
     where: { id: slotId },
     include: { booking: true, sessionType: true },
   });
-  if (!slot || slot.booking) {
+  if (!slot || slot.booking?.paymentStatus === "paid") {
     redirect("/");
   }
 
