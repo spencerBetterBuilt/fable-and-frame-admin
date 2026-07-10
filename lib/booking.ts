@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { sendEmailStub } from "@/lib/email";
+import { sendEmail } from "@/lib/email";
+import { formatSlotDate, formatSlotTimeRange } from "@/lib/format";
 
 // Source of truth for "this booking got paid." Called from both the Stripe
 // webhook (checkout.session.completed) and the success-redirect page, since
@@ -41,11 +42,21 @@ export async function fulfillCheckoutSession(session: Stripe.Checkout.Session) {
   });
   if (!lead) return;
 
-  const sessionTypeName = lead.booking?.slot.sessionType.name ?? "your session";
+  const slot = lead.booking?.slot;
+  const sessionType = slot?.sessionType;
+  const sessionTypeName = sessionType?.name ?? "your session";
 
-  sendEmailStub(
+  const details = slot
+    ? [
+        formatSlotDate(slot.date),
+        formatSlotTimeRange(slot.startTime, slot.durationMin),
+        sessionType?.location ?? "location to be confirmed",
+      ].join("\n")
+    : "We'll follow up shortly with your session details.";
+
+  await sendEmail(
     lead.email,
     "You're booked with Fable & Frame Studios!",
-    `Thanks for booking ${sessionTypeName} with Fable & Frame Studios. Your deposit has been received. Next, we'll send over a contract to review and sign — keep an eye on your inbox.`
+    `Thanks for booking ${sessionTypeName} with Fable & Frame Studios. Your deposit has been received.\n\n${details}\n\nNext, we'll send over a contract to review and sign — keep an eye on your inbox.`
   );
 }

@@ -61,6 +61,10 @@ export default async function SessionTypesPage() {
             <span className="font-body text-xs text-ink/60">Description (optional)</span>
             <input name="description" type="text" className={inputClasses} />
           </label>
+          <label className="flex flex-col gap-1 flex-1 min-w-[200px]">
+            <span className="font-body text-xs text-ink/60">Location (optional)</span>
+            <input name="location" type="text" className={inputClasses} />
+          </label>
           <button
             type="submit"
             className="bg-ink text-ivory font-body text-xs uppercase tracking-[0.06em] px-4 py-2.5 hover:bg-cinematic-dark"
@@ -119,6 +123,15 @@ export default async function SessionTypesPage() {
                       name="description"
                       type="text"
                       defaultValue={sessionType.description ?? ""}
+                      className={inputClasses}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                    <span className="font-body text-xs text-ink/60">Location</span>
+                    <input
+                      name="location"
+                      type="text"
+                      defaultValue={sessionType.location ?? ""}
                       className={inputClasses}
                     />
                   </label>

@@ -8,6 +8,7 @@ export async function createSessionType(formData: FormData) {
   const depositDollars = Number(formData.get("depositDollars") ?? 0);
   const durationMin = Number(formData.get("durationMin") ?? 30);
   const description = String(formData.get("description") ?? "").trim();
+  const location = String(formData.get("location") ?? "").trim();
 
   if (!name || !depositDollars) return;
 
@@ -17,6 +18,7 @@ export async function createSessionType(formData: FormData) {
       depositCents: Math.round(depositDollars * 100),
       durationMin,
       description: description || null,
+      location: location || null,
     },
   });
   revalidatePath("/admin/session-types");
@@ -29,6 +31,7 @@ export async function updateSessionType(sessionTypeId: string, formData: FormDat
   const depositDollars = Number(formData.get("depositDollars") ?? 0);
   const durationMin = Number(formData.get("durationMin") ?? 30);
   const description = String(formData.get("description") ?? "").trim();
+  const location = String(formData.get("location") ?? "").trim();
   const isActive = formData.get("isActive") === "on";
 
   if (!name || !depositDollars) return;
@@ -40,6 +43,7 @@ export async function updateSessionType(sessionTypeId: string, formData: FormDat
       depositCents: Math.round(depositDollars * 100),
       durationMin,
       description: description || null,
+      location: location || null,
       isActive,
     },
   });
